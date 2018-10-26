@@ -69,7 +69,7 @@ class rnn_trainer():
             correct += predicted.eq(labels.view_as(predicted)).sum().item()
         return (100 * correct / total)
 
-    def go(self,):
+    def go(self):
         self._load_data()
         val_acc_list = []
         for epoch in tqdm.trange(self.num_epochs):
@@ -77,3 +77,4 @@ class rnn_trainer():
             val_acc = self.eval_stage()
             val_acc_list.append(val_acc)
         return val_acc_list
+    
