@@ -10,6 +10,7 @@ class cnn_trainer(rnn_trainer):
     def __init__(self, train_data, val_data, pre_trained_emb, args):
         super(rnn_trainer, self).__init__()
         
+        
         self.device = torch.device(args['device'])
         
         #data
@@ -32,3 +33,5 @@ class cnn_trainer(rnn_trainer):
             self.optim = torch.optim.Adam(self.model.parameters(), lr=self.lr)
         self.criterion = torch.nn.CrossEntropyLoss()
         self.num_epochs = args['num_epochs']
+
+        self.args = args

@@ -3,7 +3,7 @@ import torch
 import torch.nn.functional as F
 from models.rnn import RNN
 from SNLI_DataLoader import SNLIDataset, snli_collate_func
-
+import os
 class rnn_trainer():
     
     def __init__(self, train_data, val_data, pre_trained_emb, args):
@@ -30,7 +30,7 @@ class rnn_trainer():
             self.optim = torch.optim.Adam(self.model.parameters(), lr=self.lr)
         self.criterion = torch.nn.CrossEntropyLoss()
         self.num_epochs = args['num_epochs']
-        
+        self.args = args
     def _load_data(self):
         train_dataset = SNLIDataset(self.train_data)
         self.train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
@@ -64,6 +64,7 @@ class rnn_trainer():
             
         return train_loss/data_count
     def eval_stage(self):
+        self._load_data()
         correct = 0
         total = 0
         self.model.eval()
@@ -76,7 +77,7 @@ class rnn_trainer():
             correct += predicted.eq(labels.view_as(predicted)).sum().item()
         return (100 * correct / total)
 
-    def go(self,):
+    def go(self):
         self._load_data()
         val_acc_list = []
         train_loss_list = []
@@ -86,3 +87,22 @@ class rnn_trainer():
             val_acc = self.eval_stage()
             val_acc_list.append(val_acc)
         return train_loss_list, val_acc_list
+    
+    def save_model(self, model_dir, model_name):
+        """
+        save model
+        @Args model_dir: directory for saving the model
+        @Args model_name: name of the model 
+        """
+        fileloc = os.path.join(model_dir, model_name+'.pth')
+            
+        with open(fileloc, 'wb') as f:
+            torch.save({'state_dict': self.model.state_dict(), 'config_dict': self.args}, f)
+            
+    def load_model(self, model_dir, model_name):
+        fileloc = os.path.join(model_dir, model_name+'.pth')
+        with open(fileloc, 'rb') as model_dict:
+            checkpoint = torch.load(model_dict)
+        
+        
+        self.model.load_state_dict(checkpoint['state_dict'])
