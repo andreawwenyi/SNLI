@@ -76,7 +76,7 @@ class rnn_trainer():
             correct += predicted.eq(labels.view_as(predicted)).sum().item()
         return (100 * correct / total)
 
-    def go(self,):
+    def go(self):
         self._load_data()
         val_acc_list = []
         train_loss_list = []
