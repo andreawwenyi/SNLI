@@ -44,6 +44,8 @@ class rnn_trainer():
                                                    shuffle=True)
 
     def train_stage(self):
+        train_loss = 0
+        data_count = 0
         for data in self.train_loader:
             prem, prem_len, hyp, hyp_len, labels = [data[i].to(self.device) for i in range(len(data))]
             self.model.train()
@@ -55,7 +57,12 @@ class rnn_trainer():
             # Backward and optimize
             loss.backward()
             self.optim.step()
-        
+            
+            #document loss
+            train_loss += loss.item()
+            data_count += prem.size()[0]
+            
+        return train_loss/data_count
     def eval_stage(self):
         correct = 0
         total = 0
@@ -72,8 +79,10 @@ class rnn_trainer():
     def go(self,):
         self._load_data()
         val_acc_list = []
+        train_loss_list = []
         for epoch in tqdm.trange(self.num_epochs):
-            self.train_stage()
+            train_loss = self.train_stage()
+            train_loss_list.append(train_loss)
             val_acc = self.eval_stage()
             val_acc_list.append(val_acc)
-        return val_acc_list
+        return train_loss_list, val_acc_list
